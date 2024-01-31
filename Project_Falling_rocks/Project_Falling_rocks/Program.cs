@@ -1,173 +1,166 @@
-﻿using Project_Falling_rocks;
-using System.Diagnostics;
-using System.Numerics;
-using System.Reflection.Metadata.Ecma335;
-
-
-namespace FallingRocks
+﻿namespace falling_rocks;
+class Program
 {
-    public class FallingRocks
+    static void Main(string[] args)
     {
-        const int windowHeight = 40;
-        const int windowWidth = 50;
-        const int sizeOfScorePanel = 10;
-        static int score = 0;
-        static string inputSpawnRate;
-        static string inputFallSpeed;
-        static List<Rock> rocks = new List<Rock>();
-        static Player player;
-        static List<Rock> rocksToRemove = new List<Rock>(); 
+        const int WindowHeight = 40;
+        const int WindowWidth = 50;
+        const int SizeOfScorePanel = 10;
 
-        static int playerWindowCenterWidth = (Console.WindowWidth - 1) / 2;
-        static int consoleMaxHeight = Console.WindowHeight - sizeOfScorePanel;
-        static int playerWindowBottomHeight = consoleMaxHeight - 1;
-        static int rocksSpawnRate;
-        static void Main(string[] args)
+        int score = 0;
+
+        Console.WriteLine($"Rocks spawn rate hardness level (from 1 to 10 - 4 is prefferable)");
+
+        string inputSpawnRate = Console.ReadLine();
+        int rocksSpawnRate = ProcessPlayerRocksSpawnRateChoice(inputSpawnRate);
+
+        Console.WriteLine("Rocks fall speed lever(from 50 to 150 - 120 is prefferable)");
+        string inputFallSpeed = Console.ReadLine();
+        int rocksFallSpeed = ProcessPlayerRockFallSpeedChoice(inputFallSpeed);
+
+        SetWindowProperties();
+
+        int playerWindowCenterWidth = (Console.WindowWidth - 1) / 2;
+        int consoleMaxHeight = Console.WindowHeight - SizeOfScorePanel;
+
+        int playerWindowBottomHeight = consoleMaxHeight - 1;
+
+
+        Player player = new Player(playerWindowCenterWidth, playerWindowBottomHeight);
+
+        List<Rock> rocks = new List<Rock>();
+
+        while (true)
         {
-            Console.WriteLine("Rocks spawn rate hardness level (from 1 to 10 - 4 is prefferable)");
-            inputSpawnRate = Console.ReadLine();
+            RedrawConsole();
 
-            rocksSpawnRate = ProcessPlayerRocksSpawnRateChoice(inputSpawnRate);
+            CreateRocks();
 
-            Console.WriteLine("Rocks fall speed level (from 50 to 150 - 120 is prefferable)");
-            inputFallSpeed = Console.ReadLine();
+            player.Draw();
+            DrawRocks();
 
-            int rocksFallSpeed = ProcessPlayerRockFallSpeedChoice(inputFallSpeed);
+            player.Move();
+            MoveRocks();
 
-            SetWindowProperties();
-
-            player = new Player(playerWindowCenterWidth, playerWindowBottomHeight);
-
-            while (true)
+            if (player.HasBeenHit)
             {
-                RedrawConsole();
-
-                CreateRocks();
-
-                player.Draw();
-
-                DrawRocks();
-
-                player.Move();
-
-                MoveRocks();
-
-                if (player.HasBeenHit)
-                {
-                    EndGame();
-                    return;
-                }
-
-                Thread.Sleep(rocksFallSpeed);
+                EndGame();
+                return;
             }
+
+            Thread.Sleep(rocksFallSpeed);
         }
 
-        static int ProcessPlayerRocksSpawnRateChoice(string inputSpawnRate)
+        int ProcessPlayerRocksSpawnRateChoice(string inputSpawnRate)
         {
-            bool playerInputSpawnRate = int.TryParse(inputSpawnRate, out int spawnRate);
+            bool spawnRateChoice = int.TryParse(inputSpawnRate, out int spawnRate);
 
             int minSpawnRate = 1;
             int maxSpawnRate = 10;
 
-            if (playerInputSpawnRate || spawnRate < maxSpawnRate || spawnRate > minSpawnRate)
+            if (spawnRateChoice || spawnRate > minSpawnRate || spawnRate < maxSpawnRate)
             {
                 spawnRate = 4;
             }
-
             return spawnRate;
         }
 
-        static int ProcessPlayerRockFallSpeedChoice(string inputFallSpeed)
+        int ProcessPlayerRockFallSpeedChoice(string inputFallSpeed)
         {
-            bool playerInputRockFallSpeed = int.TryParse(inputFallSpeed, out int fallSpeed);
+            bool FallSpeedChoice = int.TryParse(inputFallSpeed, out int FallSpeed);
 
             int minFallSpeed = 50;
             int maxFallSpeed = 150;
 
-            if (playerInputRockFallSpeed || fallSpeed < maxFallSpeed || fallSpeed > minFallSpeed)
+            if (FallSpeedChoice || FallSpeed > minFallSpeed || FallSpeed < maxFallSpeed)
             {
-                fallSpeed = 120;
+                FallSpeed = 120;
             }
-            int totalRockFallSpeed = 200;
+            return FallSpeed;
 
-            return totalRockFallSpeed + fallSpeed; 
+            int totalRocksFallSpeed = 200;
+            return totalRocksFallSpeed = FallSpeed;
+
         }
 
-        static void SetWindowProperties()
+        void SetWindowProperties()
         {
             Console.Clear();
             Console.CursorVisible = false;
-            Console.SetWindowSize(windowWidth, windowHeight);
-            Console.SetBufferSize(windowWidth, windowHeight);
+
+            Console.SetWindowSize(WindowWidth, WindowHeight);
+            Console.SetBufferSize(WindowWidth, WindowHeight);
+
         }
 
-        static void CreateRocks()
-        {
-            int consoleMaxWidth = Console.WindowWidth - 1;
-
-            for (int width = 1; width < consoleMaxWidth; width++)
-            {
-                if (ShouldGenerateRock())
-                {
-                    Rock currentWidth = new Rock(width);
-                    rocks.Add(currentWidth);
-                }
-            }
-        }
-
-        static bool ShouldGenerateRock()
-        {
-            Random random = new Random();
-            int spawnRateMaxValue = 100;
-            return random.Next(0, 101) >= spawnRateMaxValue - rocksSpawnRate;
-        }
-        static void RedrawConsole()
+        void RedrawConsole()
         {
             Console.SetCursorPosition(0, 0);
-            for (int i = 0; i < windowWidth - sizeOfScorePanel; i++)
+
+            for (int i = 0; i < WindowWidth - SizeOfScorePanel; i++)
             {
-                Console.Write(new String(' ', windowWidth));
+                Console.Write(new string(' ', WindowWidth));
             }
 
             DrawScorePanel();
         }
 
-        static void DrawScorePanel()
+        void DrawScorePanel()
         {
-            for (int width = 0; width < Console.WindowWidth; width++)
+            for (int i = 0; i < Console.WindowWidth; i++)
             {
-                Console.Write('=');
+                Console.WriteLine("=");
             }
 
-            Console.WriteLine($"Your score is: {score}");
-            Console.WriteLine($"Rocks spawn rate: {ProcessPlayerRocksSpawnRateChoice(inputSpawnRate)}   Rocks fall speed: {ProcessPlayerRockFallSpeedChoice(inputFallSpeed)}");
+            Console.WriteLine($"Your score is {score}");
+            Console.Write($"Rocks spawn rate: {rocksSpawnRate}    Rocks Fall Speed: {rocksFallSpeed}");
 
         }
 
-        static void DrawRocks()
+        void CreateRocks()
+        {
+            int ConsoleMaxWidth = Console.WindowWidth - 1;
+
+            for (int width = 1; width < ConsoleMaxWidth; width++)
+            {
+                if (ShouldGenerateRocks())
+                {
+                    Rock newRock = new Rock(width);
+                    rocks.Add(newRock);
+                }
+            }
+        }
+
+        bool ShouldGenerateRocks()
+        {
+            Random random = new Random();
+
+            int spawnMaxRateValue = 100;
+
+            return random.Next(0, 101) >= spawnMaxRateValue - rocksSpawnRate;
+        }
+
+        void DrawRocks()
         {
             foreach (Rock rock in rocks)
             {
                 Console.SetCursorPosition(rock.X, rock.Y);
                 Console.Write(rock.Symbol);
+
             }
         }
 
-        static void MoveRocks()
+        void MoveRocks()
         {
-            List<Rock> rocksToMove = new List<Rock>();
-
-
+            List<Rock> rocksToRemove = new List<Rock>();
             foreach (Rock rock in rocks)
             {
                 rock.Y++;
-
                 if (rock.Y == consoleMaxHeight)
                 {
-                    rocksToMove.Add(rock);
+                    rocksToRemove.Add(rock);
                     score++;
                 }
-
                 if (ThereIsCollision(rock, player))
                 {
                     player.HasBeenHit = true;
@@ -175,10 +168,11 @@ namespace FallingRocks
             }
 
             RemoveRocks(rocksToRemove, rocks);
+
+
         }
 
-
-        static bool ThereIsCollision(Rock rock, Player player)
+        bool ThereIsCollision(Rock rock, Player player)
         {
             if (RockAndPlayerAreOnSameWidth(rock, player) && RockAndPlayerAreOnSameHeight(rock, player))
             {
@@ -187,25 +181,24 @@ namespace FallingRocks
             return false;
         }
 
-        static bool RockAndPlayerAreOnSameWidth(Rock rock, Player player)
-        => rock.X == player.X || rock.X == player.X + 1 || rock.X == player.X + 2;
+        bool RockAndPlayerAreOnSameWidth(Rock rock, Player player) => rock.X == player.X || rock.X == player.X + 1 || rock.X == player.X + 2;
+        bool RockAndPlayerAreOnSameHeight(Rock rock, Player player) => rock.Y == player.Y + 1;
 
-        static bool RockAndPlayerAreOnSameHeight(Rock rock, Player player)
-        => rock.Y == player.Y + 1;
-
-        static void RemoveRocks(List<Rock> rocksToRemove, List<Rock> rocks)
+        void RemoveRocks(List<Rock> rocksToRemove, List<Rock> rocks)
         {
             foreach (var rock in rocksToRemove)
             {
                 rocks.Remove(rock);
             }
+
         }
 
-        static void EndGame()
+        void EndGame()
         {
-            int GameOverTextRow = 33;
-            Console.SetCursorPosition(0, GameOverTextRow);
+            int gameOverTextRow = 33;
+            Console.SetCursorPosition(0, gameOverTextRow);
             Console.Write("GAME OVER!!!");
         }
+
     }
 }
