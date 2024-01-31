@@ -1,4 +1,4 @@
-﻿namespace falling_rocks;
+﻿namespace Project_Falling_rocks;
 class Program
 {
     static void Main(string[] args)

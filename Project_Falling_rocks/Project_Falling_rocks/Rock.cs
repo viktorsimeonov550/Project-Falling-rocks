@@ -1,5 +1,5 @@
 ﻿using System;
-namespace falling_rocks
+namespace Project_Falling_rocks
 {
     public class Rock
     {
